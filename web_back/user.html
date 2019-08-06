@@ -24,38 +24,38 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">用户名称：</label>
                     <div class="col-sm-4">
-                        <input type="text" class="form-control" id="inputEmail3" value="李思思">
+                        <input type="text" class="form-control username" name="username" id="inputEmail3" value="李思思">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">昵称：</label>
                     <div class="col-sm-4">
-                        <input type="text" class="form-control" id="inputEmail3" value="思思">
+                        <input type="text" class="form-control nickname" name="nickname" id="inputEmail3" value="思思">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">邮箱：</label>
                     <div class="col-sm-4">
-                        <input type="text" class="form-control" id="inputEmail3" value="lisisi@126.com">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="inputPassword3" class="col-sm-2 control-label">用户图标：</label>
-                    <div class="col-sm-10">
-                        <img src="images/2.jpg" alt="" class="user_pic">
-                        <input type="file" id="exampleInputFile">
+                        <input type="text" class="form-control email" id="inputEmail3" name="email" value="lisisi@126.com">
                     </div>
                 </div>
 
                 <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label">密码：</label>
-                        <div class="col-sm-4">
-                            <input type="password" class="form-control" id="inputEmail3" value="12345678">
-                        </div>
+                    <label for="inputPassword3" class="col-sm-2 control-label">用户图标：</label>
+                    <div class="col-sm-10">
+                        <img src="images/2.jpg" alt="" class="user_pic"  style="width: 100px;">
+                        <input type="file" id="exampleInputFile" name="userPic">
                     </div>
-               
-    
+                </div>
+
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label">密码：</label>
+                    <div class="col-sm-4">
+                        <input type="password" class="form-control password" name="password" id="inputEmail3" value="12345678">
+                    </div>
+                </div>
+
+
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
                         <button type="submit" class="btn btn-success">修改</button>
@@ -64,6 +64,81 @@
             </form>
         </div>
     </div>
+
+    <script>
+        // 入口函数
+        $(function () {
+
+            // 需求:我们要先展示图片出来
+            // 1.给选择文件按钮注册点击事件
+            $('#exampleInputFile').on('change', function () {
+                // 通过files[0]获取当前点击的元素
+                var di = this.files[0]
+                var url = URL.createObjectURL(di)//获取url
+                // 再讲url付给img的src属性
+                $('.user_pic').attr('src', url)
+
+            })
+
+            // 第二步:需求一进页面就发送ajax请求获取到的内容显示在对应的标签上
+            $.ajax({
+                url: 'http://localhost:8080/admin/user/detail',
+                success: function (backData) {
+                    console.log(backData);
+                    if (backData.code = 200) {
+                        // 如果验证成功就把所有的数据渲染到页面上
+                        // $('input.password').val(backData.data.password)
+                        $('.user_pic').attr('src', backData.data.userPic)
+
+                        for (var key in backData.data) {
+                            $('input.' + key).val(backData.data[key])
+                        }
+                    }
+                }
+            });
+
+            // 给修改按钮发送ajax请求
+            $('.btn-success').on('click', function (e) {
+
+                e.preventDefault();
+                // 发送ajax请求编辑用户信息
+                // 用formData来做 form表单一定要有name属性,而且name属性值要和返回数据名一致
+
+                var fd = new FormData($('form')[0])
+                $.ajax({
+                    type: 'post',
+                    url: 'http://localhost:8080/admin/user/edit',
+                    data: fd,
+                    processData: false,
+                    contentType: false,
+                    success: function (backData) {
+                        // 修改成功就刷新下页面
+                        // 需求:一进页面获取用户信息刷新到页面对应的标签上
+                        // 发送ajax请求
+                        $.ajax({
+                            type: 'get',
+                            url: 'http://localhost:8080/admin/user/info',
+                            success: function (backData) {
+                                console.log(backData);
+                                if (backData.code == 200) {
+                                    alert('修改成功')
+                                    // 把数据添加到对应的标签上
+                                    parent.$('.user_info>span').html('欢迎&nbsp;&nbsp;' + backData.data.nickname);
+                                    parent.$('.user_info>img').attr('src', backData.data.userPic);
+                                    parent.$('.user_center_link>img').attr('src', backData.data.userPic);
+                                }
+                            }
+
+                        })
+                    }
+                })
+
+
+            })
+
+        })
+
+    </script>
 
 </body>
 
