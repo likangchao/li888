@@ -34,7 +34,8 @@
             <div class="level01"><a href="comment_list.html" target="main_frame"><i class="iconfont icon-comment"></i><span>评论管理</span></a></div>
             <div class="level01"><a href="user.html" target="main_frame"><i class="iconfont icon-user"></i><span>个人中心</span></a></div>
         </div>
-    </div>
+    </div> 
+    
 
     <div class="header_bar">
         <form class="search_form">
@@ -152,7 +153,7 @@
                 success:function(backData){
                     console.log(backData);
                     if(backData.code==200){
-                        alert('')
+                       
                         // 把数据添加到对应的标签上
                         $('.user_info>span').html('欢迎&nbsp;&nbsp;'+backData.data.nickname);
                         $('.user_info>img').attr('src',backData.data.userPic);
