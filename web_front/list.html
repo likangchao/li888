@@ -11,7 +11,7 @@
     <link rel="stylesheet" type="text/css" href="css/jquery.pagination.css">
     <link rel="stylesheet" type="text/css" href="css/main.css">
     <script type="text/javascript" src="js/jquery-1.12.4.min.js"></script>
-	<script type="text/javascript" src="js/jquery.pagination.min.js"></script>
+    <script type="text/javascript" src="js/jquery.pagination.min.js"></script>
 </head>
 
 <body>
@@ -56,7 +56,7 @@
         </div>
     </div>
 
-    <div class="main_con clearfix">
+    <div class="main_con clearfix toubu">
         <div class="left_con setfr">
 
             <div class="list_title">
@@ -137,11 +137,11 @@
 
             <div id="pagination" class="page"></div>
             <script>
-                $(function() {
+                $(function () {
                     $("#pagination").pagination({
                         currentPage: 2,
-                        totalPage:8,
-                        callback: function(current) {
+                        totalPage: 8,
+                        callback: function (current) {
                             alert('ok!');
                         }
                     });
@@ -220,11 +220,55 @@
             <span>|</span>
             <a href="#">招聘人才</a>
             <span>|</span>
-            <a href="#">友情链接</a>		
+            <a href="#">友情链接</a>
         </div>
-        <p>CopyRight © 2019 深圳大事件信息技术股份有限公司   All Rights Reserved</p>
-        <p>电话：0755-****888    粤ICP备*******8号</p>
+        <p>CopyRight © 2019 深圳大事件信息技术股份有限公司 All Rights Reserved</p>
+        <p>电话：0755-****888 粤ICP备*******8号</p>
     </div>
+
+    <!-- 导入模板js文件 -->
+    <script src="../web_back/js/template-web.js"></script>
+    <script id="xia" type="text/html">
+    {{each data.data v}}
+    <div class="common_news_list">
+    <a href="#" class="list_pic"><img src={{v.cover}} alt=""></a>
+                <h4><a href="#" >{{v.title}} </a></h4>
+                <p>{{v.content}}</p>
+    <div class="new_info">
+              <span>标签：{{v.categoryId}}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<i class="fa fa-eye"></i>&nbsp;阅读( 5
+              )&nbsp;&nbsp;&nbsp;<i class="fa fa-commenting"></i>&nbsp;评论( 10 )</span>
+             <b>发布于 {{v.data}}</b>
+    </div>
+ </div>
+
+
+                    
+    {{/each}}
+    </script>
+
+    <script>
+
+        // 入口函数
+        $(function () {
+            // 需求:发送ajax请求把内容渲染到页面上
+            $.ajax({
+                type: 'get',
+                url: 'http://localhost:8080/admin/article/query',
+                data: {
+                    page: 1,
+                    perpage: 6
+                },
+                success: function (backData) {
+                    if (backData.code == 200) {
+                        // // 请求成功就把数据添加到页面上
+                        var sun = template('xia', backData)
+                        $('.toubu').html(sun)
+                    }
+                }
+            })
+        })
+
+    </script>
 
 </body>
 
