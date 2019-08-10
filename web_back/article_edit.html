@@ -27,12 +27,13 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章标题：</label>
                     <div class="col-sm-10">
-                        <input type="email" class="form-control" id="inputEmail3" value="文章标题文字">
+                        <input type="email" class="form-control title" id="inputEmail3" value="文章标题文字">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputPassword3" class="col-sm-2 control-label">文章封面：</label>
                     <div class="col-sm-10">
+                        <!-- 选择照片就是为了展现出来,所有给img -->
                         <img src="images/pic06.jpg" class="article_cover">
                         <input type="file" id="exampleInputFile">
                     </div>
@@ -40,7 +41,7 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章类别：</label>
                     <div class="col-sm-4">
-                        <select class="form-control">
+                        <select class="form-control category" name="categoryId">
                             <option>类别一</option>
                             <option>类别二</option>
                             <option>类别三</option>
@@ -50,14 +51,13 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="inputEmail3" class="col-sm-2 control-label">发布时间：</label>
+                    <label for="inputEmail3" class="col-sm-2 control-label ">发布时间：</label>
                     <div class="col-sm-4">
 
                         <div class="input-group">
-                            <input type="text" class="form-control" value="2019-05-17" id="dateinput">
+                            <input type="text" name="date" class="form-control date" value="2019-05-17" id="dateinput">
                             <span class="input-group-btn">
-                                <button class="btn btn-default" type="button"
-                                    onclick="jeDate('#dateinput',{trigger:false,format: 'YYYY-MM-DD'})"><i
+                                <button class="btn btn-default" type="button" onclick="jeDate('#dateinput',{trigger:false,format: 'YYYY-MM-DD'})"><i
                                         class="iconfont icon-icondate"></i></button>
                             </span>
                         </div>
@@ -66,7 +66,8 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章内容：</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" id="rich_content" name="content" placeholder="文章内容" value="文章内容">
+                        <input type="text" class="form-control" id="rich_content" name="content" placeholder="文章内容"
+                            value="文章内容">
                     </div>
                 </div>
                 <div class="form-group">
@@ -79,5 +80,59 @@
     </div>
 
 </body>
+
+<!-- 导入模板引擎js文件 -->
+<script src="./js/template-web.js"></script>
+<!-- 准备模板 -->
+<script id="moban" type="text/html">
+          {{each data v}}
+  <option value="{{v.id}}">{{v.name}}</option>
+          {{/each}}
+  </script>
+
+<script>
+
+    // 入口函数
+    $(function () {
+
+        //   需求:一进页面就发送ajax请求,获取文章类型通过模板引擎渲染到文章类别款里
+        $.ajax({
+            url: 'http://localhost:8080/admin/category/list',
+            success: function (backData) {
+                if (backData.code == 200) {
+                    console.log(backData);
+                    // 通过模板把数据渲染到页面上
+                    var sun = template('moban', backData)
+                    $('.category').html(sun)
+                }
+            }
+        })
+
+
+        // 需求:获取从列表传递过来的id,通过id获取所有的文章信息,展现在页面对应的标签上
+        var id = window.location.search.split('=')[1]
+        console.log(id);
+        //    发送ajax请求
+        $.ajax({
+            type: 'get',
+            url='http://localhost:8080/admin/article/search',
+            data: {
+                id:id
+            },
+            success: function (backData) {
+                if (backData.code == 200) {
+                    // 如果获取成功就把获取到的信息显示到对应的标签上
+                    $('input.tltle').val(backData.data.title)
+                    $('.article_cover').attr('src', backData.data.cover)
+                    $('selest.category').val(backData.data.categoryId)
+                    $('input.date').val(backData.data.date)
+                    $('#rich_content').val(backData.data.content)
+                }
+            }
+
+        })
+    })
+
+</script>
 
 </html>

@@ -204,7 +204,46 @@
         <p>CopyRight © 2019 深圳大事件信息技术股份有限公司 All Rights Reserved</p>
         <p>电话：0755-****888 粤ICP备*******8号</p>
     </div>
+    <script src="./js/jquery-1.12.4.min.js"></script>
+    <script src="../web_back/js/template-web.js"></script>
+    <!-- 准备一个模板 -->
+    <script id="article-sb" type="text/html">
+       {{author}} 发布于 {{data}}&nbsp;&nbsp;&nbsp;分类: 奇趣事&nbsp;&nbsp;&nbsp;阅读:
+            (98)&nbsp;&nbsp;&nbsp;评论: (0)
+    </script>
+    <script>
+        // 入口函数
+        $(function () {
+            // 获取id
+         var id = window.location.search.split("=")[1]
+            // 根据id获取文章内容
+            // 发送ajax请求
+            console.log(id);
+           
+            
 
+            
+            $.ajax({
+                type: 'get',
+                url: 'http://localhost:8080/admin/article/search',
+                data: {
+                    id:id
+                },
+                success: function (backData) {
+                    console.log(backData);
+                    
+                    if (backData.code == 200) {
+                  $('.article_title').text(backData.data.title)
+                  $('.article_con').html(backData.data.content)
+                            var  sun =template('article-sb',backData.data)
+                             $('.article_info').html(sun)
+                    }
+                }
+            })
+        })
+
+
+    </script>
 </body>
 
 </html>

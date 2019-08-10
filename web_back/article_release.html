@@ -15,9 +15,11 @@
     <script src="js/jedate/js/jedate.js"></script>
     <script src="js/tinymce/js/tinymce/tinymce.min.js"></script>
     <script src="js/tinymce/js/tinymce_setup.js"></script>
+    <script src="./js/moment.js"></script>
 </head>
 
 <body>
+
     <div class="container-fluid">
         <div class="common_title">
             写文章
@@ -27,19 +29,26 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章标题：</label>
                     <div class="col-sm-10">
-                        <input type="email" class="form-control" id="inputEmail3" placeholder="文章标题">
+                        <input type="text" class="form-control" name="title" id="inputEmail3" placeholder="文章标题">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputPassword3" class="col-sm-2 control-label">文章封面：</label>
                     <div class="col-sm-10">
-                        <input type="file" id="exampleInputFile">
+                        <!-- 外加个img,用来预览图片 -->
+                        <img src="" alt="" class="user_pic" style="width: 100px;"><br>
+                        <label for="exampleInputFile">
+                            <img src="./images/timg.jpg" alt="" style="width: 50px">
+                        </label>
+                        <!-- name给input标签,input标签才是真正的选择图片,img只是展现图片 -->
+                        <input type="file" id="exampleInputFile" name="cover" style="display: none">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章类别：</label>
                     <div class="col-sm-4">
-                        <select class="form-control">
+                        <!-- name要给下来菜框 -->
+                        <select class="form-control xiala" name="categoryId">
                             <option>1</option>
                             <option>2</option>
                             <option>3</option>
@@ -53,10 +62,10 @@
                     <div class="col-sm-4">
 
                         <div class="input-group">
-                            <input type="text" class="form-control" placeholder="YYYY-MM-DD" id="dateinput">
+                            <input type="text" class="form-control" name="date" placeholder="YYYY-MM-DD" id="dateinput">
                             <span class="input-group-btn">
-                                <button class="btn btn-default" type="button"
-                                    onclick="jeDate('#dateinput',{trigger:false,format: 'YYYY-MM-DD'})"><i
+                           
+                                <button class="btn btn-default" type="button" onclick="jeDate('#dateinput',{trigger:false,format: 'YYYY-MM-DD'})"><i
                                         class="iconfont icon-icondate"></i></button>
                             </span>
                         </div>
@@ -65,8 +74,9 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章内容：</label>
                     <div class="col-sm-10">
-                        <textarea class="form-control" id="rich_content" name="content" placeholder="文章内容">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda fugiat illo nihil molestias ab. Laborum eius non atque, totam sapiente quae obcaecati assumenda ratione inventore pariatur maiores, qui libero delectus.
+                         <!-- 富文本选择器用name获取不到文本,我们要用方法来获取 -->
+                        <textarea class="form-control" id="rich_content" placeholder="文章内容">
+
                             </textarea>
                     </div>
                 </div>
@@ -79,6 +89,77 @@
             </form>
         </div>
     </div>
+
+    <!-- 导入模板引擎js文件 -->
+    <script src="./js/template-web.js"></script>
+    <!-- 准备模板 -->
+    <script id="moban" type="text/html">
+            {{each data v}}
+    <option value="{{v.id}}">{{v.name}}</option>
+            {{/each}}
+    </script>
+    <script>
+
+        // 入口函数
+        $(function () {
+
+
+            // 1.需求:把图片预览出来
+            // 1.1给选择文件按钮注册change事件
+            $('#exampleInputFile').on('change', function () {
+                // 通过flird[0]获取当前点击的是哪个文件
+                var wen = this.files[0]
+                var url = URL.createObjectURL(wen)
+                $('.user_pic').attr('src', url)
+            })
+
+            //   需求:一进页面就发送ajax请求,获取文章类型通过模板引擎渲染到文章类别款里
+            $.ajax({
+                url: 'http://localhost:8080/admin/category/list',
+                success: function (backData) {
+                    if (backData.code == 200) {
+                        console.log(backData);
+                        // 通过模板把数据渲染到页面上
+                        var sun = template('moban', backData)
+                        $('.xiala').html(sun)
+                    }
+                }
+            })
+
+
+            // 需求:页面一进来就显示系统时间
+            //实际开发的时候,传入时间一般是一个时间戳
+            //时间戳: 其实就是从1970年1月1号早八点, 到某一个时间 中间经历的毫秒数.
+            var timeStr = moment().format('YYYY-MM-DD');//注意:moment为0就是当前系统时间
+            console.log(timeStr);
+            $('#dateinput').val(timeStr)
+            // 1.给按钮注册点击事件
+            $('.btn-success').on('click', function () {
+                var fd = new FormData($('form')[0])//因为只有一个form表单,要加0
+                // 获取富文本中的文本,添加到fd中
+                fd.append('content',tinyMCE.activeEditor.getContent())
+                fd.append('state','已发布')
+
+                // 发送ajax请求
+                $.ajax({
+                    type:'post',
+                    url:"http://localhost:8080/admin/article/publish",
+                    data:fd,
+                    processData:false,
+                    contentType:false,
+                    success:function(backData){
+                        if( backData.code==200){
+                            alert('发布成功')
+
+                        }
+                    }
+                })
+            })
+
+        })
+
+    </script>
+
 
 </body>
 

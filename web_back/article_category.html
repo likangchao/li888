@@ -65,14 +65,14 @@
                         <td class="text-center">
                             <a href="javascript:editTr({&quot;id&quot;:&quot;4&quot;,&quot;slug&quot;:&quot;travel&quot;,&quot;name&quot;:&quot;爱旅行&quot;});"
                                 class="btn btn-info btn-xs">编辑</a>
-                            <a href="javascript:deleteTr( 4 );" class="btn btn-danger btn-xs">删除</a>
+                            <a href="#" class="btn btn-danger btn-xs ">删除</a>
                         </td>
                     </tr>
                 </tbody>
                 <tfoot>
                     <tr>
                         <td colspan="3" class="text-center">
-                            <a href="#" class="btn btn-success" data-toggle="modal" data-target="#addModal">新增分类</a>
+                            <a href="#" class="btn btn-success" data-toggle="modal" id="xinzen" data-target="#addModal">新增分类</a>
                         </td>
                     </tr>
                 </tfoot>
@@ -89,13 +89,14 @@
                 </div>
                 <div class="modal-body">
                     <form>
+                        <input type="hidden" name="id" id="cunid">
                         <div class="form-group">
                             <label for="recipient-name" class="control-label">分类名称:</label>
-                            <input type="text" class="form-control" id="recipient-name">
+                            <input type="text" class="form-control" name="name" id="recipient-name">
                         </div>
                         <div class="form-group">
                             <label for="message-text" class="control-label">分类别名:</label>
-                            <input type="text" class="form-control" id="recipient-log">
+                            <input type="text" class="form-control" name="slug" id="recipient-log">
                         </div>
                     </form>
                 </div>
@@ -114,18 +115,12 @@
         });
 
         $('#model_shutoff').click(function () {
-            alert('shutoff');
+            // alert('shutoff');
             $('#addModal').modal('hide');
         });
 
 
 
-        $('.category_table').delegate('a', 'click', function () {
-            if ($(this).hasClass('btn-info')) {
-                $('#addModal .modal-title').html('修改分类名称');
-                $('#addModal').modal('show');
-            }
-        })      
     </script>
     <!-- 导入模板引擎js文件 -->
     <script src="./js/template-web.js"></script>
@@ -137,8 +132,8 @@
             <td>{{v.name}}</td>
             <td>{{v.slug}}</td>
             <td class="text-center">
-                <a href="#" data-id="{{v.id}}">编辑</a>
-                <a href="#" data-id="{{v.id}}" class="btn btn-danger btn-xs">删除</a>
+                <a href="#" data-id="{{v.id}}" class="btn btn-info btn-xs">编辑</a>
+                <a href="#" data-id="{{v.id}}" class="btn btn-danger btn-xs btn-delete">删除</a>
                 <!-- 自动添加一个属性用来储蓄元素的id -->
             </td>
         </tr>
@@ -169,28 +164,112 @@
             fun()
             // 给按钮注册点击事件
             $('#model_add').click(function () {
-                //    第二步:获取输入框中的类别名称和别名
-                var na = $('#recipient-name').val()
-                var su = $('#recipient-log').val()
-                // 发送ajax请求进行新增
+
+                // 判断点击的是新增还是修改
+                if ($(this).hasClass('btn-success')) {
+                    // alert('我是修改')
+                    // 获取id和输入框中的文本
+                    // var name = $('#recipient-na').val()
+                    // var slug = $('#recipient-log').val()
+                    // var id = $('#cunid').val()
+                    var fd = $('form').serialize()//form表单里要有name属性他的值要和键一致
+
+                    $.ajax({
+                        type: 'post',
+                        url: 'http://localhost:8080/admin/category/edit',
+                        data: fd,
+                        success: function (backData) {
+                            if (backData.code == 200) {
+                                alert('修改成功')
+                                fun()
+                                $('#addModal').modal('hide');
+                            }
+                        }
+
+                    })
+
+                } else {
+
+
+                    //    第二步:获取输入框中的类别名称和别名
+                    var na = $('#recipient-name').val()
+                    var su = $('#recipient-log').val()
+                    // 发送ajax请求进行新增
+                    $.ajax({
+                        type: 'post',
+                        url: 'http://localhost:8080/admin/category/add',
+                        data: {
+                            name: na,
+                            slug: su
+                        },
+                        success: function (backData) {
+                            $('#recipient-name').val("")
+                            $('#recipient-log').val("")
+                            if (backData.code == 201) {
+                                alert('新增成功')
+                                fun()
+                            }
+                        }
+                    })
+
+                    $('#addModal').modal('hide');
+                }
+
+
+
+
+            });
+
+
+
+            $('tbody').on('click', 'a.btn-info', function () {
+
+                $('#addModal .modal-title').html('修改分类');
+                $('#model_add').text('修改').addClass('btn-success')
+
+                // 获取当前点击的文本
+                var dianid = $(this).attr('data-id')//id
+                var mingcheng = $(this).parent().prev().prev().text()//别名
+                var Slu = $(this).parent().prev().text()//slug,名
+
+
+                // 显示到对应的标签上
+                // $('#recipient-na').val(mingcheng)
+                $('#recipient-name    ').val(mingcheng)
+                $('#recipient-log').val(Slu)
+                $('#cunid').val(dianid)
+
+
+
+                $('#addModal').modal('show');
+
+            })
+
+            $('#xinzen').on('click', function () {
+                $('#addModal .modal-title').html('新增分类');
+                $('#model_add').text('新增').removeClass('btn-success')
+            })
+
+            // 需求:点击删除按钮进行删除
+            // 1.先要获取当前点击这个按钮的id通过id来删除
+            // 给删除按钮注册点击事件,因为按钮是动态生成的我们要委托注册
+            $('tbody').on('click', 'a.btn-delete', function () {
+                var cunid = $(this)
+                var id = $(this).attr('data-id')
                 $.ajax({
                     type: 'post',
-                    url: 'http://localhost:8080/admin/category/add',
+                    url: 'http://localhost:8080/admin/category/delete',
                     data: {
-                        name: na,
-                        slug: su
+                        id: id
                     },
                     success: function (backData) {
-                        if (backData.code == 201) {
-                            alert('新增成功')
-                            fun()
-                        }
+                        console.log(backData);
+                        // fun()
+                        cunid.parent().parent().remove()
                     }
+
                 })
-
-
-                $('#addModal').modal('hide');
-            });
+            })
         })
 
     </script>
