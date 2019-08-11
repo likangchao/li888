@@ -16,6 +16,7 @@
     <script src="js/tinymce/js/tinymce/tinymce.min.js"></script>
     <script src="js/tinymce/js/tinymce_setup.js"></script>
     <script src="./js/moment.js"></script>
+    <script src="./js/bootstrap/js/bootstrap.min.js"></script>
 </head>
 
 <body>
@@ -64,7 +65,7 @@
                         <div class="input-group">
                             <input type="text" class="form-control" name="date" placeholder="YYYY-MM-DD" id="dateinput">
                             <span class="input-group-btn">
-                           
+
                                 <button class="btn btn-default" type="button" onclick="jeDate('#dateinput',{trigger:false,format: 'YYYY-MM-DD'})"><i
                                         class="iconfont icon-icondate"></i></button>
                             </span>
@@ -74,7 +75,7 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章内容：</label>
                     <div class="col-sm-10">
-                         <!-- 富文本选择器用name获取不到文本,我们要用方法来获取 -->
+                        <!-- 富文本选择器用name获取不到文本,我们要用方法来获取 -->
                         <textarea class="form-control" id="rich_content" placeholder="文章内容">
 
                             </textarea>
@@ -87,6 +88,26 @@
                     </div>
                 </div>
             </form>
+        </div>
+
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                </div>
+                <div class="modal-body">
+                    你确定要发布吗
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary btn-que">确定</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -134,25 +155,36 @@
             console.log(timeStr);
             $('#dateinput').val(timeStr)
             // 1.给按钮注册点击事件
-            $('.btn-success').on('click', function () {
+            $('.btn-success').on('click', function (e) {
+
+                e.preventDefault()
+
                 var fd = new FormData($('form')[0])//因为只有一个form表单,要加0
                 // 获取富文本中的文本,添加到fd中
-                fd.append('content',tinyMCE.activeEditor.getContent())
-                fd.append('state','已发布')
+                fd.append('content', tinyMCE.activeEditor.getContent())
+                fd.append('state', '已发布')
 
-                // 发送ajax请求
-                $.ajax({
-                    type:'post',
-                    url:"http://localhost:8080/admin/article/publish",
-                    data:fd,
-                    processData:false,
-                    contentType:false,
-                    success:function(backData){
-                        if( backData.code==200){
-                            alert('发布成功')
+                $('#myModal').modal({
+                    keyboard: false
+                })
 
+                // 给确定按钮注册点击事件
+                $('.btn-que').on('click', function () {
+
+
+                    // 发送ajax请求
+                    $.ajax({
+                        type: 'post',
+                        url: "http://localhost:8080/admin/article/publish",
+                        data: fd,
+                        processData: false,
+                        contentType: false,
+                        success: function (backData) {
+                            // 自动刷新页面
+                            window.location.reload();
                         }
-                    }
+                    })
+
                 })
             })
 
