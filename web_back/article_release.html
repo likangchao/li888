@@ -156,22 +156,16 @@
             $('#dateinput').val(timeStr)
             // 1.给按钮注册点击事件
             $('.btn-success').on('click', function (e) {
-
                 e.preventDefault()
-
                 var fd = new FormData($('form')[0])//因为只有一个form表单,要加0
                 // 获取富文本中的文本,添加到fd中
                 fd.append('content', tinyMCE.activeEditor.getContent())
                 fd.append('state', '已发布')
-
                 $('#myModal').modal({
                     keyboard: false
                 })
-
                 // 给确定按钮注册点击事件
                 $('.btn-que').on('click', function () {
-
-
                     // 发送ajax请求
                     $.ajax({
                         type: 'post',

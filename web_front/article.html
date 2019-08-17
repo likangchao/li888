@@ -211,35 +211,76 @@
        {{author}} 发布于 {{data}}&nbsp;&nbsp;&nbsp;分类: 奇趣事&nbsp;&nbsp;&nbsp;阅读:
             (98)&nbsp;&nbsp;&nbsp;评论: (0)
     </script>
+
+    <!-- 准备一个评论模板 -->
+    <script id="pinlun" type="text/html">
+    {{each data v}}
+    
+    <li>
+            <span>{{v.author[0]}}</span>
+            <b><em>{{v.author}}</em>({{v.date}})说:</b>
+            <strong>{{v.intro}}</strong>
+        </li>
+{{/each}}
+</script>
+
+
+<!-- 准备一个焦点关注模板 -->
+<script id="jiaodian" type="text/html">
+    {{each data}}
+    <li><a href="#">{{$value.intro}}</a></li>
+    {{/each}}
+    </script>
+    
+
     <script>
         // 入口函数
         $(function () {
             // 获取id
-         var id = window.location.search.split("=")[1]
+            var id = window.location.search.split("=")[1]
             // 根据id获取文章内容
             // 发送ajax请求
             console.log(id);
-           
-            
 
-            
             $.ajax({
                 type: 'get',
                 url: 'http://localhost:8080/admin/article/search',
                 data: {
-                    id:id
+                    id: id
                 },
                 success: function (backData) {
                     console.log(backData);
-                    
+
                     if (backData.code == 200) {
-                  $('.article_title').text(backData.data.title)
-                  $('.article_con').html(backData.data.content)
-                            var  sun =template('article-sb',backData.data)
-                             $('.article_info').html(sun)
+                        $('.article_title').text(backData.data.title)
+                        $('.article_con').html(backData.data.content)
+                        var sun = template('article-sb', backData.data)
+                        $('.article_info').html(sun)
                     }
                 }
-            })
+            });
+
+            // 需求:一进页面就发送ajax请求.获取最新评论,通过模板引擎渲染到页面上
+            $.ajax({
+                url: 'http://localhost:8080/index/latest_comment',
+                success: function (backData) {
+                    // 获取成功就通过模板引擎渲染到页面上
+                    var son = template('pinlun', backData)
+                    $('ul.comment_list').html(son)
+                }
+            });
+
+               // 需求:一进页面就发送ajax请求获取最新七条焦点关注,通过模板引擎渲染到页面上
+        $.ajax({
+            url:'http://localhost:8080/index/attention',
+            success:function(backData){
+                if(backData.code==200){
+                    // 获取成功就渲染到页面
+               var jiao = template('jiaodian',backData)
+               $('ul.guanzhu_list').html(jiao)
+                }
+            }
+        })
         })
 
 
